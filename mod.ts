@@ -8,6 +8,8 @@ const cachePromise = caches.open(cacheKey);
 export function withCache(handler: Handler): Handler {
   return async (req, connInfo) => {
     const cache = await cachePromise;
+
+    // キャッシュがある時はキャッシュを利用する
     const cacheResponse = await cache.match(req);
     if (cacheResponse) {
       // キャッシュ期限
@@ -20,6 +22,8 @@ export function withCache(handler: Handler): Handler {
         cache.delete(req);
       }
     }
+
+    // キャッシュが無いときはレスポンスを生成する
     const serverResponse = await handler(req, connInfo);
     // キャッシュ期限のunixtimeが返る。falseの時はキャッシュしない
     const cacheUntil = getCacheControl(serverResponse.headers);
